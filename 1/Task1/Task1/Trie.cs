@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Task1
 {
-    public class Trie
+    public class Trie : ITrie
     {
         private Node Root { get; }
 

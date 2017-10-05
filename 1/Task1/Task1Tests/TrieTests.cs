@@ -6,7 +6,7 @@ namespace Task1Tests
     [TestClass()]
     public class TrieTests
     {
-        private Trie _trie;
+        private ITrie _trie;
 
         [TestInitialize]
         public void TestInitialize()
