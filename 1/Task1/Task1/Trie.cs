@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Task1
 {
     public class Trie : ITrie
     {
-        private Node Root { get; }
+        private Node _root { get; }
 
         public Trie()
         {
-            Root = new Node(null);
+            _root = new Node(null);
         }
 
         #region public
@@ -30,10 +29,7 @@ namespace Task1
             return true;
         }
 
-        public bool Contains(string element)
-        {
-            return GetNode(element, false)?.IsTerminal ?? false;
-        }
+        public bool Contains(string element) => GetNode(element, false)?.IsTerminal ?? false;
 
         public bool Remove(string element)
         {
@@ -46,10 +42,7 @@ namespace Task1
             return true;
         }
 
-        public int Size()
-        {
-            return Root.ElementsCount;
-        }
+        public int Size() => _root.ElementsCount;
 
         public int HowManyStartsWithPrefix(string prefix)
         {
@@ -68,7 +61,7 @@ namespace Task1
             {
                 return null;
             }
-            Node node = Root;
+            Node node = _root;
             foreach (char c in element)
             {
                 if (!node.Children.ContainsKey(c))
@@ -99,19 +92,17 @@ namespace Task1
             {
                 node.IsTerminal = false;
                 Update(node);
-                while (!IsRoot(node) && node.IsLeaf && !node.IsTerminal)
+                while (!IsRoot(node) && node.CanBeDeleted())
                 {
-                    var p = node.Parent;
-                    p.Children.Remove(node.Symbol);
+                    Node p = node.Parent;
+                    Debug.Assert(node.Symbol != null, "Non root node does not contain character");
+                    p.Children.Remove(node.Symbol.Value);
                     node = p;
                 }
             }
         }
 
-        private bool IsRoot(Node node)
-        {
-            return node != null && node.Parent == null;
-        }
+        private bool IsRoot(Node node) => node != null && node.Parent == null;
 
         private void RequireNonNull(Object obj)
         {
@@ -125,28 +116,28 @@ namespace Task1
 
         private class Node
         {
-            public Dictionary<char, Node> Children { get; } = new Dictionary<char, Node>();
+            public Dictionary<char, Node> Children { get; }
             public bool IsTerminal { get; set; }
 
-            public char Symbol { get; }
+            public char? Symbol { get; }
 
             public bool IsLeaf => Children.Count == 0;
 
-            public int ElementsCount { get; set; } = 0;
+            public int ElementsCount { get; private set; }
 
             public Node Parent { get; }
 
-            public Node(Node parent, char c = '\0', bool isTerminal = false)
+            public Node(Node parent, char? c = null, bool isTerminal = false)
             {
+                Children = new Dictionary<char, Node>();
                 IsTerminal = isTerminal;
                 Symbol = c;
                 Parent = parent;
             }
 
-            public void Update()
-            {
-                ElementsCount = Children.Sum(p => p.Value.ElementsCount) + Convert.ToInt32(IsTerminal);
-            }
+            public void Update() => ElementsCount = Children.Sum(p => p.Value.ElementsCount) + Convert.ToInt32(IsTerminal);
+
+            public bool CanBeDeleted() => IsLeaf && !IsTerminal;
         }
     }
 }
