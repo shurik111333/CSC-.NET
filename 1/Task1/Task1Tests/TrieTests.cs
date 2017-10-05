@@ -1,9 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Task1;
 
 namespace Task1Tests
 {
-    [TestClass()]
+    [TestClass]
     public class TrieTests
     {
         private ITrie _trie;
@@ -14,7 +15,7 @@ namespace Task1Tests
             _trie = new Trie();
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void AddTest()
         {
             Assert.IsTrue(_trie.Add("abacaba"));
@@ -26,7 +27,13 @@ namespace Task1Tests
             Assert.IsFalse(_trie.Add("qwerty"));
         }
 
-        [TestMethod()]
+        [TestMethod, ExpectedException(typeof(ArgumentNullException))]
+        public void AddNullTest()
+        {
+            _trie.Add(null);
+        }
+
+        [TestMethod]
         public void ContainsTest()
         {
             Assert.IsTrue(_trie.Add("abacaba"));
@@ -41,7 +48,17 @@ namespace Task1Tests
             Assert.IsFalse(_trie.Contains("qwergh"));
         }
 
-        [TestMethod()]
+        [TestMethod]
+        public void ContainsNullTest()
+        {
+            Assert.IsFalse(_trie.Contains(null));
+
+            _trie.Add(string.Empty);
+
+            Assert.IsFalse(_trie.Contains(null));
+        }
+
+        [TestMethod]
         public void RemoveTest()
         {
             Assert.IsTrue(_trie.Add("abacaba"));
@@ -55,7 +72,13 @@ namespace Task1Tests
             Assert.IsFalse(_trie.Remove("qqqqqqq"));
         }
 
-        [TestMethod()]
+        [TestMethod, ExpectedException(typeof(ArgumentNullException))]
+        public void RemoveNullTest()
+        {
+            _trie.Remove(null);
+        }
+
+        [TestMethod]
         public void SizeTest()
         {
             Assert.AreEqual(_trie.Size(), 0);
@@ -82,7 +105,7 @@ namespace Task1Tests
             Assert.AreEqual(_trie.Size(), 0);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void HowManyStartsWithPrefixTest()
         {
             Assert.IsTrue(_trie.Add("abacaba"));
@@ -105,6 +128,12 @@ namespace Task1Tests
             Assert.AreEqual(_trie.HowManyStartsWithPrefix("ab"), 6);
             Assert.AreEqual(_trie.HowManyStartsWithPrefix("abc"), 2);
             Assert.AreEqual(_trie.HowManyStartsWithPrefix("aba"), 3);
+        }
+
+        [TestMethod, ExpectedException(typeof(ArgumentNullException))]
+        public void HowManyStartWithNullPrefixTest()
+        {
+            _trie.HowManyStartsWithPrefix(null);
         }
     }
 }

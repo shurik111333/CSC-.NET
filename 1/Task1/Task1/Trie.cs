@@ -19,6 +19,7 @@ namespace Task1
 
         public bool Add(string element)
         {
+            RequireNonNull(element); 
             Node node = GetNode(element, true);
             if (node.IsTerminal)
             {
@@ -36,6 +37,7 @@ namespace Task1
 
         public bool Remove(string element)
         {
+            RequireNonNull(element);
             if (!Contains(element))
             {
                 return false;
@@ -51,6 +53,7 @@ namespace Task1
 
         public int HowManyStartsWithPrefix(string prefix)
         {
+            RequireNonNull(prefix);
             Node node = GetNode(prefix, false);
             return node?.ElementsCount ?? 0;
         }
@@ -61,6 +64,10 @@ namespace Task1
 
         private Node GetNode(string element, bool createIfNotExist)
         {
+            if (element == null)
+            {
+                return null;
+            }
             Node node = Root;
             foreach (char c in element)
             {
@@ -88,23 +95,30 @@ namespace Task1
 
         private void Remove(Node node)
         {
-            if (node == null)
+            if (node != null)
             {
-                throw new ArgumentNullException();
-            }
-            node.IsTerminal = false;
-            Update(node);
-            while (!IsRoot(node) && node.IsLeaf && !node.IsTerminal)
-            {
-                var p = node.Parent;
-                p.Children.Remove(node.Symbol);
-                node = p;
+                node.IsTerminal = false;
+                Update(node);
+                while (!IsRoot(node) && node.IsLeaf && !node.IsTerminal)
+                {
+                    var p = node.Parent;
+                    p.Children.Remove(node.Symbol);
+                    node = p;
+                }
             }
         }
 
         private bool IsRoot(Node node)
         {
-            return node.Parent == null;
+            return node != null && node.Parent == null;
+        }
+
+        private void RequireNonNull(Object obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException();
+            }
         }
 
         #endregion
