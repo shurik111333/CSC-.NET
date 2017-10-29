@@ -1,0 +1,143 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+
+namespace Task1
+{
+    public class Trie : ITrie
+    {
+        private Node _root { get; }
+
+        public Trie()
+        {
+            _root = new Node(null);
+        }
+
+        #region public
+
+        public bool Add(string element)
+        {
+            RequireNonNull(element); 
+            Node node = GetNode(element, true);
+            if (node.IsTerminal)
+            {
+                return false;
+            }
+            node.IsTerminal = true;
+            Update(node);
+            return true;
+        }
+
+        public bool Contains(string element) => GetNode(element, false)?.IsTerminal ?? false;
+
+        public bool Remove(string element)
+        {
+            RequireNonNull(element);
+            if (!Contains(element))
+            {
+                return false;
+            }
+            Remove(GetNode(element, false));
+            return true;
+        }
+
+        public int Size() => _root.ElementsCount;
+
+        public int HowManyStartsWithPrefix(string prefix)
+        {
+            RequireNonNull(prefix);
+            Node node = GetNode(prefix, false);
+            return node?.ElementsCount ?? 0;
+        }
+
+        #endregion
+
+        #region private
+
+        private Node GetNode(string element, bool createIfNotExist)
+        {
+            if (element == null)
+            {
+                return null;
+            }
+            Node node = _root;
+            foreach (char c in element)
+            {
+                if (!node.Children.ContainsKey(c))
+                {
+                    if (!createIfNotExist)
+                    {
+                        return null;
+                    }
+                    node.Children.Add(c, new Node(node, c));
+                }
+                node = node.Children[c];
+            }
+            return node;
+        }
+
+        private void Update(Node node)
+        {
+            while (node != null)
+            {
+                node.Update();
+                node = node.Parent;
+            }
+        }
+
+        private void Remove(Node node)
+        {
+            if (node != null)
+            {
+                node.IsTerminal = false;
+                Update(node);
+                while (!IsRoot(node) && node.CanBeDeleted())
+                {
+                    Node p = node.Parent;
+                    Debug.Assert(node.Symbol != null, "Non root node does not contain character");
+                    p.Children.Remove(node.Symbol.Value);
+                    node = p;
+                }
+            }
+        }
+
+        private bool IsRoot(Node node) => node != null && node.Parent == null;
+
+        private void RequireNonNull(Object obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException();
+            }
+        }
+
+        #endregion
+
+        private class Node
+        {
+            public Dictionary<char, Node> Children { get; }
+            public bool IsTerminal { get; set; }
+
+            public char? Symbol { get; }
+
+            public bool IsLeaf => Children.Count == 0;
+
+            public int ElementsCount { get; private set; }
+
+            public Node Parent { get; }
+
+            public Node(Node parent, char? c = null, bool isTerminal = false)
+            {
+                Children = new Dictionary<char, Node>();
+                IsTerminal = isTerminal;
+                Symbol = c;
+                Parent = parent;
+            }
+
+            public void Update() => ElementsCount = Children.Sum(p => p.Value.ElementsCount) + Convert.ToInt32(IsTerminal);
+
+            public bool CanBeDeleted() => IsLeaf && !IsTerminal;
+        }
+    }
+}
