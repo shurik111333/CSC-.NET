@@ -8,7 +8,7 @@ let fib n =
         match n with
         | 0 -> b
         | n -> fib' b (a + b) (n - 1)
-    fib' n 0 1
+    fib' 0 1 n
 
 // Reverse list
 let reverse l = 
